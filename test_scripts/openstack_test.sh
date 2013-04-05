@@ -8,6 +8,10 @@
 #   $test_mode type of test to run (accepts: tempest_full, tempest_smoke, puppet_openstack, unit)
 #   $module_install_method - how to install modules (accepts librarian or pmt)
 #
+# it also allows the following optional build parameters
+#    $checkout_patch_command - command that is run after alls gems and modules have been installed. This is
+#      intended to be a place holder for logic that checks out branches
+#
 # # I am running it as follows:
 # mkdir $BUILD_ID
 # cd $BUILD_ID
@@ -34,6 +38,15 @@ elif [ $module_install_method = 'pmt' ]; then
   git clone git://github.com/puppetlabs/puppetlabs-tempest modules/tempest
   git clone git://github.com/puppetlabs/puppetlabs-vcsrepo modules/vcsrepo
 fi
+
+if [ -n "${module_repo:-}" ]; then
+  pushd $module_repo
+  if [ -n "${checkout_branch_command:-}" ]; then
+    eval $checkout_branch_command
+  fi
+  popd
+fi
+
 
 # only build out integration test environment if we are not running unit tests
 if [ ! $test_mode = 'unit' ]; then
