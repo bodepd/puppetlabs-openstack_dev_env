@@ -58,25 +58,53 @@ if [ ! $test_mode = 'unit' ]; then
     echo 'openstack_version: folsom' > hiera_data/jenkins.yaml
   fi
 
-# install a controller and compute instance
-  # check that the VM is not currently running
-  # if it is, stop that VM
-  if VBoxManage list vms | grep openstack_controller.puppetlabs.lan; then
-    VBoxManage controlvm openstack_controller.puppetlabs.lan  poweroff || true
-    VBoxManage unregistervm openstack_controller.puppetlabs.lan  --delete
-  fi
-  bundle exec vagrant up openstack_controller
+  if [ "${module_repo:-}" = 'modules/swift' ] ; then
+  # build out a swift test environment (requires a puppetmaster)
 
-  # check if the compute VM is running, if so stop the VM before launching ours
-  if VBoxManage list vms | grep compute2.puppetlabs.lan; then
-    VBoxManage controlvm compute2.puppetlabs.lan  poweroff || true
-     VBoxManage unregistervm compute2.puppetlabs.lan --delete
+    # setup environemnt for a swift test
+
+    # install a controller and compute instance
+    for i in puppetmaster swift_storage_1 swift_storage_2 swift_storage_3 swift_proxy swift_keystone; do
+
+      # cleanup running swift instances
+      if VBoxManage list vms | grep ${i}.puppetlabs.lan; then
+        VBoxManage controlvm ${i}.puppetlabs.lan  poweroff || true
+        VBoxManage unregistervm ${i}.puppetlabs.lan  --delete
+      fi
+
+    done
+
+    # build out a puppetmaster
+    bundle exec vagrant up puppetmaster
+
+    # deploy swift
+    bundle exec rake openstack:deploy_swift
+
+  else
+  # build out an openstack environment
+
+    # install a controller and compute instance
+    # check that the VM is not currently running
+    # if it is, stop that VM
+    if VBoxManage list vms | grep openstack_controller.puppetlabs.lan; then
+      VBoxManage controlvm openstack_controller.puppetlabs.lan  poweroff || true
+      VBoxManage unregistervm openstack_controller.puppetlabs.lan  --delete
+    fi
+    bundle exec vagrant up openstack_controller
+
+    # check if the compute VM is running, if so stop the VM before launching ours
+    if VBoxManage list vms | grep compute2.puppetlabs.lan; then
+      VBoxManage controlvm compute2.puppetlabs.lan  poweroff || true
+       VBoxManage unregistervm compute2.puppetlabs.lan --delete
+    fi
+    bundle exec vagrant up compute2
+    # install tempest on the controller
+    bundle exec vagrant status
   fi
-  bundle exec vagrant up compute2
-  # install tempest on the controller
-  bundle exec vagrant status
+
 fi
 
+# decide what kind of tests to run
 if [ $test_mode = 'puppet_openstack' ]; then
   # run my simple puppet integration tests
   bundle exec vagrant ssh -c 'sudo bash /tmp/test_nova.sh;exit $?' openstack_controller
@@ -89,6 +117,9 @@ elif [ $test_mode = 'tempest_full' ]; then
   bundle exec vagrant ssh -c 'cd /var/lib/tempest/;sudo ./jenkins_launch_script.sh;exit $?;' openstack_controller
 elif [ $test_mode = 'unit' ]; then
   bundle exec rake test:unit
+elif [ "${module_repo:-}" = 'swift' ] ; then
+  # assume that if the repo was swift that we are running our special little swift tests
+  bundle exec vagrant ssh -c 'sudo ruby /tmp/swift_test_file.rb;exit $?' swift_proxy
 else
   echo "Unsupported testnode ${test_mode}, this test matrix only support tempest_smoke and puppet_openstack tests"
 fi
