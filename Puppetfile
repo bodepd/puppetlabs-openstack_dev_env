@@ -1,6 +1,6 @@
 forge "http://forge.puppetlabs.com"
 
-mod 'puppetlabs/openstack', :git => 'git://github.com/puppetlabs/puppetlabs-openstack'
+mod 'puppetlabs/openstack', :git => 'git://github.com/puppetlabs/puppetlabs-openstack', :ref => 'quantum'
 mod 'puppetlabs/nova', :git => 'git://github.com/puppetlabs/puppetlabs-nova'
 mod 'puppetlabs/glance', :git => 'git://github.com/puppetlabs/puppetlabs-glance'
 mod 'puppetlabs/keystone', :git => 'git://github.com/puppetlabs/puppetlabs-keystone'
@@ -8,9 +8,9 @@ mod 'puppetlabs/horizon', :git => 'git://github.com/puppetlabs/puppetlabs-horizo
 mod 'puppetlabs/swift', :git => 'git://github.com/puppetlabs/puppetlabs-swift'
 mod 'puppetlabs/cinder', :git => 'git://github.com/puppetlabs/puppetlabs-cinder'
 mod 'puppetlabs/tempest', :git => 'git://github.com/puppetlabs/puppetlabs-tempest'
-mod 'puppet/quantum', :git => 'git://github.com/bodepd/openstack-quantum-puppet/'
+mod 'puppet/quantum', :git => 'git://github.com/bodepd/openstack-quantum-puppet', :ref => 'folsom'
 # openstack middleware
-mod 'puppet/vswitch', :git => 'git://github.com/ekarlso/puppet-vswitch'
+mod 'puppet/vswitch', :git => 'git://github.com/bodepd/puppet-vswitch', :ref => 'folsom'
 mod 'puppetlabs/rabbitmq', :git => 'git://github.com/puppetlabs/puppetlabs-rabbitmq'
 mod 'puppetlabs/mysql', :git => 'git://github.com/puppetlabs/puppetlabs-mysql'
 mod 'puppetlabs/git', :git => 'git://github.com/puppetlabs/puppetlabs-git'
