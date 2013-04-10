@@ -117,7 +117,7 @@ elif [ $test_mode = 'tempest_full' ]; then
   bundle exec vagrant ssh -c 'cd /var/lib/tempest/;sudo ./jenkins_launch_script.sh;exit $?;' openstack_controller
 elif [ $test_mode = 'unit' ]; then
   bundle exec rake test:unit
-elif [ "${module_repo:-}" = 'swift' ] ; then
+elif [ $test_mode = 'puppet_swift' ] ; then
   # assume that if the repo was swift that we are running our special little swift tests
   bundle exec vagrant ssh -c 'sudo ruby /tmp/swift_test_file.rb;exit $?' swift_proxy
 else
